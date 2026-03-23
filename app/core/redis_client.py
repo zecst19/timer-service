@@ -1,3 +1,6 @@
+"""
+Redis connection pool
+"""
 import redis
 
 from app.core.config import settings
@@ -5,4 +8,7 @@ from app.core.config import settings
 _pool = redis.ConnectionPool.from_url(settings.REDIS_URL, decode_responses=True) # pyright: ignore[reportUnknownMemberType]
 
 def get_redis() -> redis.Redis:
+    """
+    Returns a Redis client with the created connection pool
+    """
     return redis.Redis(connection_pool=_pool)

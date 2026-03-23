@@ -1,3 +1,6 @@
+"""
+Celery instance and config
+"""
 from celery import Celery
 
 from app.core.config import settings

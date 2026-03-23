@@ -118,4 +118,5 @@ No Redis or Celery broker needed — all external services are mocked.
 
 ## Assumptions/Decisions
 
-- 
+- Timer are stored 7 days after expiring
+- Time input should be made prioritizing larger unite (e.g. "60 minutes" or "60 seconds" will fail, correct input should be "1 hour" or "1 minute respectively")

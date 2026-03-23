@@ -1,3 +1,6 @@
+"""
+Config for the timer service
+"""
 import os
 
 class Settings:

@@ -1,3 +1,10 @@
+"""
+Timer API routes
+
+Endpoint:
+- POST /timer: create a new webhook timer
+- GET /timer/{timer_id}: fetch remaining time on an existing timer
+"""
 import uuid
 import math
 from datetime import datetime, timedelta, timezone
@@ -16,10 +23,27 @@ def _fire_at_key(timer_id: str) -> str:
 
 @router.post("", response_model=TimerCreateResponse, status_code=201)
 def create_timer(body: TimerCreateRequest):
+    """
+    Creates a new timer and enqueues its webhook task
+
+    Stores the scheduled fire time in Redis so that GET /timer can calculate 
+    remaining seconds without querying Celery. The Celery task is enqueued with 
+    an 'eta' so it's held by the broker until the desired execution time, 
+    persisting over API and worker restarts.
+
+    Args:
+        body (TimerCreateRequest): request body containing target url and timer duration
+
+    Raises:
+        HTTPException 422: if the total duration is 0
+
+    Returns:
+        response body containing the target url and total seconds until it expires
+    """
     total = body.total_seconds()
     if total <= 0:
         raise HTTPException(
-            status_code=400,
+            status_code=422,
             detail="Timer duration must be greater than zero"
         )
     
@@ -39,6 +63,18 @@ def create_timer(body: TimerCreateRequest):
 
 @router.get("/{timer_id}", response_model=TimerStatusResponse)
 def get_timer(timer_id: str):
+    """
+    Returns the number of seconds remaining until the given timer expires
+
+    Args:
+        timer_id (str): UUID of the timer 
+
+    Raises:
+        HTTPException 404: if no timer is found with the given 'timer_id'
+
+    Returns:
+        response body containing the timer_id and total seconds remaining (0 if already expired)
+    """
     r = get_redis()
     raw = r.get(_fire_at_key(timer_id))
 

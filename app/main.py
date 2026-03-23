@@ -1,3 +1,6 @@
+"""
+Timer service - FastAPI app entry point
+"""
 from fastapi import FastAPI
 
 from app.api.routes import router as timer_router
