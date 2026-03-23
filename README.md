@@ -59,12 +59,6 @@ Get remaining time on a timer.
 
 ---
 
-### `GET /health`
-
-Liveness probe. Returns `{"status": "ok"}`.
-
----
-
 ## Webhook Payload
 
 When a timer fires, the service sends an HTTP `POST` to the configured URL with:
@@ -118,5 +112,9 @@ No Redis or Celery broker needed — all external services are mocked.
 
 ## Assumptions/Decisions
 
+<<<<<<< HEAD
 - Timer are stored 7 days after expiring
 - Time input should be made prioritizing larger unite (e.g. "60 minutes" or "60 seconds" will fail, correct input should be "1 hour" or "1 minute respectively")
+=======
+- 
+>>>>>>> 237898124222e1d78f11ffac0adb97c914e818ad
