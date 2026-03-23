@@ -59,12 +59,6 @@ Get remaining time on a timer.
 
 ---
 
-### `GET /health`
-
-Liveness probe. Returns `{"status": "ok"}`.
-
----
-
 ## Webhook Payload
 
 When a timer fires, the service sends an HTTP `POST` to the configured URL with:
