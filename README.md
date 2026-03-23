@@ -36,7 +36,7 @@ Create a new timer.
 }
 ```
 
-- `time_left` — seconds until the webhook fires
+- `time_left` - seconds until the webhook fires
 - `hours + minutes + seconds` must sum to > 0
 - `minutes` and `seconds` must be 0–59
 
@@ -110,7 +110,23 @@ No Redis or Celery broker needed, all external services are mocked.
 
 ---
 
+## High-Traffic Considerations
+
+Most considerations for increased performance requirements (100 timer creation requests per second) are adding multiple instances and other services:
+
+- Redis Cluster instead of a single Redis instance
+- Deploy Celery worker on K8S and configure HPA to scale based on queue depth
+- Deploy multiple API replicas behind a load balancer
+- Add rate limiting to the load balance to prevent spikes
+- Introduce a DLQ for tasks that use up all retries, so failed deliveries can be inspected
+- Use Prometheus to analyze API and worker metrics (request rate, queue depth, webhook latency, error rates)
+
+---
+
 ## Assumptions/Decisions
 
-- Timer are stored 7 days after expiring
-- Time input should be made prioritizing larger unite (e.g. "60 minutes" or "60 seconds" will fail, correct input should be "1 hour" or "1 minute respectively")
+- Timers are stored in Redis for 7 days after expiring
+- Time input should be made prioritizing larger units (e.g. "60 minutes" or "60 seconds" will fail, correct input should be "1 hour" or "1 minute respectively")
+- No maximum duration is enforced
+- 5XX responses are retried up to 3 times
+- 4XX responses are treated as legitimate failures so they are not retried

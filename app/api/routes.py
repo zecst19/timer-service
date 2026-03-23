@@ -35,7 +35,7 @@ def create_timer(body: TimerCreateRequest):
         body (TimerCreateRequest): request body containing target url and timer duration
 
     Raises:
-        HTTPException 422: if the total duration is 0
+        HTTPException 400: if the total duration is 0
 
     Returns:
         response body containing the target url and total seconds until it expires
@@ -43,7 +43,7 @@ def create_timer(body: TimerCreateRequest):
     total = body.total_seconds()
     if total <= 0:
         raise HTTPException(
-            status_code=422,
+            status_code=400,
             detail="Timer duration must be greater than zero"
         )
     

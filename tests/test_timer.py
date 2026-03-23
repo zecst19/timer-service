@@ -112,12 +112,12 @@ class TestCreateTimer:
         key_arg = mock_redis.set.call_args[0][0]
         assert timer_id in key_arg
 
-    def test_zero_duration_rejected_with_422(self):
+    def test_zero_duration_rejected_with_400(self):
         resp = client.post(
             "/timer", 
             json={"url": "http://example.com/hook", "hours": 0, "minutes": 0, "seconds": 0},
         )
-        assert resp.status_code == 422
+        assert resp.status_code == 400
 
     def test_invalid_url_rejected_with_422(self):
         resp = client.post(
@@ -251,7 +251,7 @@ class TestFireWebhookTask:
 
         assert result["status"] == "client_error"
         assert result["http_status"] == 404
-        mock_client_cls.delete.assert_not_called()
+        mock_redis.delete.assert_not_called()
 
     @patch("app.tasks.webhook.get_redis")
     @patch("app.tasks.webhook.httpx.Client")
