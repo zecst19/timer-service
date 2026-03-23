@@ -92,7 +92,7 @@ All state lives in Redis, so any number of API or worker instances can run simul
 
 ## Persistence / Crash Recovery
 
-- Celery tasks are stored in **Redis** with `task_acks_late=True` — the broker holds the task until a worker *acknowledges* successful execution.
+- Celery tasks are stored in **Redis** with `task_acks_late=True`, the broker holds the task until a worker *acknowledges* successful execution.
 - If a worker crashes mid-execution, the task is re-queued automatically.
 - If a worker is down when a timer's ETA arrives, the task fires **immediately** when the worker comes back online.
 - Redis itself is configured with `appendonly yes` (AOF persistence), so tasks survive a Redis restart.
@@ -106,7 +106,7 @@ pip install -r requirements.txt
 pytest tests/ -v
 ```
 
-No Redis or Celery broker needed — all external services are mocked.
+No Redis or Celery broker needed, all external services are mocked.
 
 ---
 
