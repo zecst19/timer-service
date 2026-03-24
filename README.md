@@ -21,7 +21,7 @@ Create a new timer.
 **Request body:**
 ```json
 {
-  "url": "https://your-server.com/webhook",
+  "url": "http://example.com/hook",
   "hours": 0,
   "minutes": 5,
   "seconds": 0
@@ -36,9 +36,9 @@ Create a new timer.
 }
 ```
 
-- `time_left` - seconds until the webhook fires
-- `hours + minutes + seconds` must sum to > 0
-- `minutes` and `seconds` must be 0–59
+- "time_left" - seconds until the webhook fires
+- "hours" + "minutes" + "seconds" must sum to > 0
+- "minutes" and "seconds" must be 0–59
 
 ---
 
@@ -69,8 +69,6 @@ When a timer fires, the service sends an HTTP `POST` to the configured URL with:
 }
 ```
 
-Failed calls (5xx or network errors) are retried up to **3 times** with a 5-second delay. 4xx responses are not retried.
-
 ---
 
 ## Scaling
@@ -92,10 +90,10 @@ All state lives in Redis, so any number of API or worker instances can run simul
 
 ## Persistence / Crash Recovery
 
-- Celery tasks are stored in **Redis** with `task_acks_late=True`, the broker holds the task until a worker *acknowledges* successful execution.
+- Celery tasks are stored in Redis with `task_acks_late=True`, the broker holds the task until a worker acknowledges successful execution.
 - If a worker crashes mid-execution, the task is re-queued automatically.
-- If a worker is down when a timer's ETA arrives, the task fires **immediately** when the worker comes back online.
-- Redis itself is configured with `appendonly yes` (AOF persistence), so tasks survive a Redis restart.
+- If a worker is down when a timer expires, the task fires when the worker comes back online.
+- Redis is configured with `appendonly yes`, so tasks survive a Redis restart.
 
 ---
 
@@ -114,19 +112,19 @@ No Redis or Celery broker needed, all external services are mocked.
 
 Most considerations for increased performance requirements (100 timer creation requests per second) are adding multiple instances and other services:
 
-- Redis Cluster instead of a single Redis instance
-- Deploy Celery worker on K8S and configure HPA to scale based on queue depth
-- Deploy multiple API replicas behind a load balancer
-- Add rate limiting to the load balance to prevent spikes
-- Introduce a DLQ for tasks that use up all retries, so failed deliveries can be inspected
-- Use Prometheus to analyze API and worker metrics (request rate, queue depth, webhook latency, error rates)
+- Redis Cluster instead of a single Redis instance.
+- Deploy Celery worker on K8S and configure HPA to scale based on queue depth.
+- Deploy multiple API replicas behind a load balancer.
+- Add rate limiting to the load balance to prevent spikes.
+- Introduce a DLQ for tasks that use up all retries, so failed deliveries can be inspected.
+- Use Prometheus to analyze API and worker metrics (request rate, queue depth, webhook latency, error rates).
 
 ---
 
 ## Assumptions/Decisions
 
-- Timers are stored in Redis for 7 days after expiring
-- Time input should be made prioritizing larger units (e.g. "60 minutes" or "60 seconds" will fail, correct input should be "1 hour" or "1 minute respectively")
-- No maximum duration is enforced
-- 5XX responses are retried up to 3 times
-- 4XX responses are treated as legitimate failures so they are not retried
+- Timers are stored in Redis for 7 days after expiring.
+- Time input should be made prioritizing larger units (e.g. "60 minutes" or "60 seconds" will fail, correct input should be "1 hour" or "1 minute respectively").
+- No maximum duration is enforced.
+- 5XX responses are retried up to 3 times.
+- 4XX responses are treated as legitimate failures so they are not retried.
